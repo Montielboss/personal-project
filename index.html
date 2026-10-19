@@ -88,11 +88,17 @@
             <canvas id="completionChart" height="220" aria-label="Gráfica de objetivos completados por día"></canvas>
             <p class="chart-empty" id="chartEmpty">Aún no hay objetivos completados.</p>
           </article>
-          <article class="card stats-card statistics-summary">
-            <div class="stat-row"><span>XP de hoy</span><strong id="xpValue">0 XP</strong></div>
-            <div class="stat-row"><span>Mejor racha</span><strong id="bestValue">0 días</strong></div>
-            <div class="stat-row"><span>Total completado</span><strong id="totalValue">0</strong></div>
-          </article>
+        <article class="card stats-card statistics-summary">
+          <div class="stat-row"><span>XP de hoy</span><strong id="xpValue">0 XP</strong></div>
+          <div class="stat-row"><span>Mejor racha</span><strong id="bestValue">0 días</strong></div>
+          <div class="stat-row"><span>Total completado</span><strong id="totalValue">0</strong></div>
+        </article>
+        <section class="dev-card settings-card" aria-label="Controles de estadísticas">
+          <span class="dev-label">Controles de estadísticas</span>
+          <p class="dev-copy">Reinicia la racha o elimina todos los datos guardados.</p>
+          <button class="dev-button" id="clearStreakButton" type="button">Eliminar racha</button>
+          <button class="dev-button" id="clearTotalButton" type="button">Borrar estadísticas</button>
+        </section>
         </section>
       </main>
     </div>
