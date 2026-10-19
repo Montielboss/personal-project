@@ -44,7 +44,7 @@
             <div class="progress-number" id="homeProgressPercent">0%</div>
           </div>
           <div class="progress-track"><div class="progress-fill" id="homeProgressFill"></div></div>
-          <div class="goal-list" id="goalListHome"></div>
+          <div id="goalSectionsHome"></div>
         </article>
 
       </section>
@@ -61,8 +61,13 @@
             <div class="progress-number" id="progressPercent">0%</div>
           </div>
           <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-          <div class="goal-list" id="goalListEditor"></div>
+          <form class="section-form" id="sectionForm">
+            <input id="sectionName" maxlength="40" autocomplete="off" placeholder="Ej. Mañana, Tarde o Noche" aria-label="Nombre del apartado" />
+            <button type="submit">Añadir apartado</button>
+          </form>
+          <div id="goalSectionsEditor"></div>
           <form class="add-form" id="goalForm">
+            <select id="goalSection" aria-label="Apartado del objetivo"></select>
             <input id="goalInput" maxlength="80" autocomplete="off" placeholder="Añade un objetivo para hoy..." aria-label="Nuevo objetivo" />
             <button type="submit">Añadir</button>
           </form>
