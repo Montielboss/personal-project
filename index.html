@@ -28,11 +28,14 @@
 
     <main>
       <section class="page active" id="homePage">
+        <article class="card streak-card top-streak-card">
+          <span class="streak-label"><span class="status-dot" id="statusDot"></span>racha actual</span>
+          <div class="streak-value"><strong id="streakValue">0</strong><span>días</span></div>
+        </article>
         <section class="welcome hero">
           <p class="eyebrow">bienvenido a modo vida</p>
           <h1>Haz que tu día<br />cuente.</h1>
           <p class="hero-copy">Un espacio para avanzar a tu ritmo, cuidar tus hábitos y convertir tus pequeñas acciones en una racha que te motive.</p>
-          <button class="primary-action" data-page="goalsPage" type="button">Editar objetivos <span>→</span></button>
         </section>
 
         <article class="card goals-card home-goals-card">
@@ -44,18 +47,6 @@
           <div class="goal-list" id="goalListHome"></div>
         </article>
 
-        <section class="home-grid">
-          <article class="card streak-card">
-            <span class="streak-label"><span class="status-dot" id="statusDot"></span>racha actual</span>
-            <div class="streak-value"><strong id="streakValue">0</strong><span>días</span></div>
-            <p class="streak-message" id="streakMessage">Completa al menos el 70% de tus objetivos para encenderla.</p>
-          </article>
-          <article class="card stats-card">
-            <div class="stat-row"><span>XP de hoy</span><strong id="xpValue">0 XP</strong></div>
-            <div class="stat-row"><span>Mejor racha</span><strong id="bestValue">0 días</strong></div>
-            <div class="stat-row"><span>Total completado</span><strong id="totalValue">0</strong></div>
-          </article>
-        </section>
       </section>
 
       <section class="page" id="goalsPage" hidden>
@@ -89,14 +80,11 @@
           <canvas id="completionChart" height="220" aria-label="Gráfica de objetivos completados por día"></canvas>
           <p class="chart-empty" id="chartEmpty">Aún no hay objetivos completados.</p>
         </article>
-        <section class="dev-card settings-card" aria-label="Zona de desarrollo">
-          <span class="dev-label">Zona de desarrollo</span>
-          <p class="dev-copy">Borra la racha para probar desde cero o elimina todas las estadísticas.</p>
-          <button class="dev-button install-button" id="installButton" type="button" hidden>Instalar aplicación</button>
-          <button class="dev-button" id="notificationButton" type="button">Activar notificaciones</button>
-          <button class="dev-button" id="clearStreakButton" type="button">Eliminar racha</button>
-          <button class="dev-button" id="clearTotalButton" type="button">Borrar estadísticas</button>
-        </section>
+        <article class="card stats-card statistics-summary">
+          <div class="stat-row"><span>XP de hoy</span><strong id="xpValue">0 XP</strong></div>
+          <div class="stat-row"><span>Mejor racha</span><strong id="bestValue">0 días</strong></div>
+          <div class="stat-row"><span>Total completado</span><strong id="totalValue">0</strong></div>
+        </article>
       </section>
     </main>
   </div>
