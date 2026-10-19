@@ -1,4 +1,4 @@
-const CACHE_NAME = 'modo-vida-v1';
+const CACHE_NAME = 'modo-vida-v1.1.1';
 const APP_FILES = ['./', './index.html', './style.css', './script.js', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', event => {
