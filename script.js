@@ -48,6 +48,7 @@ function loadState() {
 }
 
 let state = loadState();
+let sectionToDelete = null;
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 function allGoals() { return state.sections.flatMap(section => section.goals); }
 function completedCount() { return allGoals().filter(goal => goal.done).length; }
@@ -192,7 +193,18 @@ function removeGoal(id) {
 
 function removeSection(id) {
   if (state.completedAll) return;
-  state.sections = state.sections.filter(section => section.id !== id);
+  sectionToDelete = id;
+  const section = state.sections.find(item => item.id === id);
+  document.getElementById('deleteConfirmText').textContent = `Se eliminarán también los objetivos de “${section?.name || 'este apartado'}”.`;
+  document.getElementById('deleteConfirm').hidden = false;
+  document.getElementById('confirmDelete').focus();
+}
+
+function confirmSectionDelete() {
+  if (!sectionToDelete) return;
+  state.sections = state.sections.filter(section => section.id !== sectionToDelete);
+  sectionToDelete = null;
+  document.getElementById('deleteConfirm').hidden = true;
   updateHistory();
   saveState();
   render();
@@ -251,6 +263,14 @@ document.getElementById('goalForm').addEventListener('submit', event => {
 
 document.getElementById('closeCelebrate').addEventListener('click', () => document.getElementById('celebrate').classList.remove('show'));
 document.getElementById('celebrate').addEventListener('click', event => { if (event.target.id === 'celebrate') event.currentTarget.classList.remove('show'); });
+document.getElementById('confirmDelete').addEventListener('click', confirmSectionDelete);
+document.getElementById('cancelDelete').addEventListener('click', () => {
+  sectionToDelete = null;
+  document.getElementById('deleteConfirm').hidden = true;
+});
+document.getElementById('deleteConfirm').addEventListener('click', event => {
+  if (event.target.id === 'deleteConfirm') document.getElementById('cancelDelete').click();
+});
 document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 window.addEventListener('resize', drawChart);
 render();
