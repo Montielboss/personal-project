@@ -1,3 +1,5 @@
+import { auth, db, doc, getDoc, setDoc, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from './firebase-config.js';
+
 const STORAGE_KEY = 'modo-vida-save-v1';
 const todayKey = new Date().toISOString().slice(0, 10);
 const QUALIFICATION_PERCENT = 70;
@@ -49,7 +51,52 @@ function loadState() {
 
 let state = loadState();
 let sectionToDelete = null;
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+let cloudUser = null;
+let cloudSyncStarted = false;
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  syncStateToCloud();
+}
+
+function cloudState() {
+  return { date: state.date, sections: state.sections, streak: state.streak, best: state.best, total: state.total, completedAll: state.completedAll, dayQualified: state.dayQualified, history: state.history };
+}
+
+async function syncStateToCloud() {
+  if (!cloudUser) return;
+  try {
+    await setDoc(doc(db, 'users', cloudUser.uid), { ...cloudState(), updatedAt: new Date().toISOString() });
+  } catch (error) {
+    console.warn('No se pudo sincronizar con Firebase:', error);
+  }
+}
+
+async function startCloudSync() {
+  if (cloudSyncStarted) return;
+  cloudSyncStarted = true;
+  try {
+    onAuthStateChanged(auth, async user => {
+      cloudUser = user || null;
+      updateAuthButton();
+      if (!user) return;
+      const snapshot = await getDoc(doc(db, 'users', user.uid));
+      if (snapshot.exists()) {
+        state = { ...state, ...snapshot.data() };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        render();
+      } else await syncStateToCloud();
+    });
+  } catch (error) {
+    console.warn('Firebase no está listo todavía. Se usará el guardado local:', error);
+  }
+}
+
+function updateAuthButton() {
+  const button = document.getElementById('authButton');
+  if (!button) return;
+  button.textContent = cloudUser ? `Cerrar sesión${cloudUser.displayName ? ` · ${cloudUser.displayName}` : ''}` : 'Iniciar sesión con Google';
+  button.classList.toggle('signed-in', Boolean(cloudUser));
+}
 function allGoals() { return state.sections.flatMap(section => section.goals); }
 function completedCount() { return allGoals().filter(goal => goal.done).length; }
 function completionPercent() { return allGoals().length ? Math.round(completedCount() / allGoals().length * 100) : 0; }
@@ -234,6 +281,18 @@ document.getElementById('menuButton').addEventListener('click', () => {
   document.getElementById('menuButton').setAttribute('aria-expanded', String(isOpen));
 });
 
+document.getElementById('authButton').addEventListener('click', async () => {
+  const button = document.getElementById('authButton');
+  try {
+    if (cloudUser) await signOut(auth);
+    else await signInWithPopup(auth, new GoogleAuthProvider());
+  } catch (error) {
+    console.warn('No se pudo iniciar sesión con Google:', error);
+    button.textContent = 'No se pudo iniciar sesión';
+    setTimeout(updateAuthButton, 2500);
+  }
+});
+
 document.getElementById('sectionForm').addEventListener('submit', event => {
   event.preventDefault();
   const input = document.getElementById('sectionName');
@@ -274,3 +333,4 @@ document.getElementById('deleteConfirm').addEventListener('click', event => {
 document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 window.addEventListener('resize', drawChart);
 render();
+startCloudSync();
