@@ -1,119 +1,122 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#090909" />
-  <meta name="description" content="Organiza tus objetivos diarios y mantén viva tu racha." />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon.svg" />
-  <title>Modo Vida — Tu día, a tu manera</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="shell">
-    <header>
-      <button class="menu-button" id="menuButton" type="button" aria-label="Abrir menú" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-      <div class="brand"><span class="brand-mark">✦</span><span>modo vida</span></div>
-      <div class="today" id="todayLabel"></div>
-    </header>
+  <!DOCTYPE html>
+  <html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#090909" />
+    <meta name="description" content="Organiza tus objetivos diarios y mantén viva tu racha." />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <title>Modo Vida — Tu día, a tu manera</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <button class="menu-button" id="menuButton" type="button" aria-label="Abrir menú" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="brand"><span class="brand-mark">✦</span><span>modo vida</span></div>
+      <div class="header-actions">
+        <div class="today" id="todayLabel"></div>
+        <button class="auth-button" id="authButton" type="button">Iniciar sesión con Google</button>
+      </div>
+      </header>
 
-    <nav class="menu" id="mainMenu" aria-label="Navegación principal">
-      <button class="menu-link active" data-page="homePage" type="button"><span>⌂</span> Inicio</button>
-      <button class="menu-link" data-page="goalsPage" type="button"><span>✓</span> Editar objetivos</button>
-      <button class="menu-link" data-page="statsPage" type="button"><span>▥</span> Estadísticas</button>
-    </nav>
+      <nav class="menu" id="mainMenu" aria-label="Navegación principal">
+        <button class="menu-link active" data-page="homePage" type="button"><span>⌂</span> Inicio</button>
+        <button class="menu-link" data-page="goalsPage" type="button"><span>✓</span> Editar objetivos</button>
+        <button class="menu-link" data-page="statsPage" type="button"><span>▥</span> Estadísticas</button>
+      </nav>
 
-    <main>
-      <section class="page active" id="homePage">
-        <article class="card streak-card top-streak-card">
-          <span class="streak-label"><span class="status-dot" id="statusDot"></span>racha actual</span>
-          <div class="streak-value"><strong id="streakValue">0</strong><span>días</span></div>
-        </article>
-        <section class="welcome hero">
-          <p class="eyebrow">bienvenido a modo vida</p>
-          <h1>Haz que tu día<br />cuente.</h1>
-          <p class="hero-copy">Un espacio para avanzar a tu ritmo, cuidar tus hábitos y convertir tus pequeñas acciones en una racha que te motive.</p>
+      <main>
+        <section class="page active" id="homePage">
+          <article class="card streak-card top-streak-card">
+            <span class="streak-label"><span class="status-dot" id="statusDot"></span>racha actual</span>
+            <div class="streak-value"><strong id="streakValue">0</strong><span>días</span></div>
+          </article>
+          <section class="welcome hero">
+            <p class="eyebrow">bienvenido a modo vida</p>
+            <h1>Haz que tu día<br />cuente.</h1>
+            <p class="hero-copy">Un espacio para avanzar a tu ritmo, cuidar tus hábitos y convertir tus pequeñas acciones en una racha que te motive.</p>
+          </section>
+
+          <article class="card goals-card home-goals-card">
+            <div class="card-top">
+              <div><h2 class="card-title">Mis objetivos de hoy</h2><p class="card-subtitle" id="homeProgressText">0 de 0 completados</p></div>
+              <div class="progress-number" id="homeProgressPercent">0%</div>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="homeProgressFill"></div></div>
+            <div id="goalSectionsHome"></div>
+          </article>
+
         </section>
 
-        <article class="card goals-card home-goals-card">
-          <div class="card-top">
-            <div><h2 class="card-title">Mis objetivos de hoy</h2><p class="card-subtitle" id="homeProgressText">0 de 0 completados</p></div>
-            <div class="progress-number" id="homeProgressPercent">0%</div>
+        <section class="page" id="goalsPage" hidden>
+          <div class="page-heading">
+            <p class="eyebrow">tu partida de hoy</p>
+            <h2>Editar objetivos</h2>
+            <p>Elige pocas cosas que te acerquen a la vida que quieres.</p>
           </div>
-          <div class="progress-track"><div class="progress-fill" id="homeProgressFill"></div></div>
-          <div id="goalSectionsHome"></div>
-        </article>
+          <article class="card goals-card">
+            <div class="card-top">
+              <div><h2 class="card-title">Objetivos de hoy</h2><p class="card-subtitle" id="progressText">0 de 0 completados</p></div>
+              <div class="progress-number" id="progressPercent">0%</div>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <form class="section-form" id="sectionForm">
+              <input id="sectionName" maxlength="40" autocomplete="off" placeholder="Ej. Mañana, Tarde o Noche" aria-label="Nombre del apartado" />
+              <button type="submit">Añadir apartado</button>
+            </form>
+            <div id="goalSectionsEditor"></div>
+            <form class="add-form" id="goalForm">
+              <select id="goalSection" aria-label="Apartado del objetivo"></select>
+              <input id="goalInput" maxlength="80" autocomplete="off" placeholder="Añade un objetivo para hoy..." aria-label="Nuevo objetivo" />
+              <button type="submit">Añadir</button>
+            </form>
+          </article>
+        </section>
 
-      </section>
-
-      <section class="page" id="goalsPage" hidden>
-        <div class="page-heading">
-          <p class="eyebrow">tu partida de hoy</p>
-          <h2>Editar objetivos</h2>
-          <p>Elige pocas cosas que te acerquen a la vida que quieres.</p>
-        </div>
-        <article class="card goals-card">
-          <div class="card-top">
-            <div><h2 class="card-title">Objetivos de hoy</h2><p class="card-subtitle" id="progressText">0 de 0 completados</p></div>
-            <div class="progress-number" id="progressPercent">0%</div>
+        <section class="page" id="statsPage" hidden>
+          <div class="page-heading">
+            <p class="eyebrow">mira tu progreso</p>
+            <h2>Estadísticas</h2>
+            <p>Observa cuántos objetivos has completado cada día.</p>
           </div>
-          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-          <form class="section-form" id="sectionForm">
-            <input id="sectionName" maxlength="40" autocomplete="off" placeholder="Ej. Mañana, Tarde o Noche" aria-label="Nombre del apartado" />
-            <button type="submit">Añadir apartado</button>
-          </form>
-          <div id="goalSectionsEditor"></div>
-          <form class="add-form" id="goalForm">
-            <select id="goalSection" aria-label="Apartado del objetivo"></select>
-            <input id="goalInput" maxlength="80" autocomplete="off" placeholder="Añade un objetivo para hoy..." aria-label="Nuevo objetivo" />
-            <button type="submit">Añadir</button>
-          </form>
-        </article>
-      </section>
-
-      <section class="page" id="statsPage" hidden>
-        <div class="page-heading">
-          <p class="eyebrow">mira tu progreso</p>
-          <h2>Estadísticas</h2>
-          <p>Observa cuántos objetivos has completado cada día.</p>
-        </div>
-        <article class="card chart-card large-chart">
-          <div class="chart-heading"><div><h2 class="card-title">Objetivos por día</h2><p class="card-subtitle">Últimos 7 días</p></div></div>
-          <canvas id="completionChart" height="220" aria-label="Gráfica de objetivos completados por día"></canvas>
-          <p class="chart-empty" id="chartEmpty">Aún no hay objetivos completados.</p>
-        </article>
-        <article class="card stats-card statistics-summary">
-          <div class="stat-row"><span>XP de hoy</span><strong id="xpValue">0 XP</strong></div>
-          <div class="stat-row"><span>Mejor racha</span><strong id="bestValue">0 días</strong></div>
-          <div class="stat-row"><span>Total completado</span><strong id="totalValue">0</strong></div>
-        </article>
-      </section>
-    </main>
-  </div>
-
-  <div class="celebrate" id="celebrate" role="dialog" aria-modal="true" aria-labelledby="celebrateTitle">
-    <div class="celebrate-box">
-      <div class="celebrate-icon">✦</div>
-      <h2 id="celebrateTitle">Día completado.</h2>
-      <p>Has completado el mínimo necesario. Tu racha sigue viva.</p>
-      <button id="closeCelebrate" type="button">Seguir avanzando</button>
+          <article class="card chart-card large-chart">
+            <div class="chart-heading"><div><h2 class="card-title">Objetivos por día</h2><p class="card-subtitle">Últimos 7 días</p></div></div>
+            <canvas id="completionChart" height="220" aria-label="Gráfica de objetivos completados por día"></canvas>
+            <p class="chart-empty" id="chartEmpty">Aún no hay objetivos completados.</p>
+          </article>
+          <article class="card stats-card statistics-summary">
+            <div class="stat-row"><span>XP de hoy</span><strong id="xpValue">0 XP</strong></div>
+            <div class="stat-row"><span>Mejor racha</span><strong id="bestValue">0 días</strong></div>
+            <div class="stat-row"><span>Total completado</span><strong id="totalValue">0</strong></div>
+          </article>
+        </section>
+      </main>
     </div>
-  </div>
 
-  <div class="confirm-modal" id="deleteConfirm" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" hidden>
-    <div class="confirm-box">
-      <h2 id="deleteConfirmTitle">¿Eliminar apartado?</h2>
-      <p id="deleteConfirmText">Se eliminarán también todos los objetivos de este apartado.</p>
-      <div class="confirm-actions">
-        <button class="confirm-cancel" id="cancelDelete" type="button">Cancelar</button>
-        <button class="confirm-delete" id="confirmDelete" type="button">Eliminar</button>
+    <div class="celebrate" id="celebrate" role="dialog" aria-modal="true" aria-labelledby="celebrateTitle">
+      <div class="celebrate-box">
+        <div class="celebrate-icon">✦</div>
+        <h2 id="celebrateTitle">Día completado.</h2>
+        <p>Has completado el mínimo necesario. Tu racha sigue viva.</p>
+        <button id="closeCelebrate" type="button">Seguir avanzando</button>
       </div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
-</body>
-</html>
+    <div class="confirm-modal" id="deleteConfirm" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" hidden>
+      <div class="confirm-box">
+        <h2 id="deleteConfirmTitle">¿Eliminar apartado?</h2>
+        <p id="deleteConfirmText">Se eliminarán también todos los objetivos de este apartado.</p>
+        <div class="confirm-actions">
+          <button class="confirm-cancel" id="cancelDelete" type="button">Cancelar</button>
+          <button class="confirm-delete" id="confirmDelete" type="button">Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+  <script type="module" src="script.js"></script>
+  </body>
+  </html>
