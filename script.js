@@ -7,7 +7,6 @@ const defaultGoals = [
   { id: crypto.randomUUID(), text: 'Hacer una cosa importante sin distraerme', done: false }
 ];
 let state = loadState();
-let deferredInstallPrompt = null;
 
 function loadState() {
   try {
@@ -115,7 +114,6 @@ function render() {
   document.getElementById('goalInput').placeholder = state.completedAll ? 'Objetivos bloqueados hasta mañana.' : 'Añade un objetivo para hoy...';
   document.querySelector('#goalForm button').disabled = state.completedAll;
   document.getElementById('statusDot').classList.toggle('on', state.dayQualified);
-  document.getElementById('streakMessage').textContent = state.dayQualified ? 'Día completado. Los objetivos se habilitan mañana.' : `Completa al menos el ${QUALIFICATION_PERCENT}% de tus objetivos para encenderla.`;
   drawChart();
 }
 
@@ -178,40 +176,6 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
 }
 
-window.addEventListener('beforeinstallprompt', event => {
-  event.preventDefault();
-  deferredInstallPrompt = event;
-  document.getElementById('installButton').hidden = false;
-});
-
-document.getElementById('installButton').addEventListener('click', async () => {
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice;
-  deferredInstallPrompt = null;
-  document.getElementById('installButton').hidden = true;
-});
-
-document.getElementById('notificationButton').addEventListener('click', async () => {
-  const button = document.getElementById('notificationButton');
-  if (!('Notification' in window)) {
-    button.textContent = 'Notificaciones no disponibles';
-    return;
-  }
-  const permission = await Notification.requestPermission();
-  if (permission !== 'granted') {
-    button.textContent = 'Permiso de notificaciones denegado';
-    return;
-  }
-  button.textContent = 'Notificaciones activadas';
-  const registration = await navigator.serviceWorker?.ready;
-  registration?.showNotification('Modo Vida', { body: 'Te avisaremos cuando vuelvas a la aplicación.', icon: './icon.svg', tag: 'modo-vida-welcome' });
-});
-
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installButton').hidden = true;
-});
-
 document.getElementById('goalForm').addEventListener('submit', event => {
   event.preventDefault();
   const input = document.getElementById('goalInput');
@@ -227,27 +191,6 @@ document.getElementById('goalForm').addEventListener('submit', event => {
 
 document.getElementById('closeCelebrate').addEventListener('click', () => document.getElementById('celebrate').classList.remove('show'));
 document.getElementById('celebrate').addEventListener('click', event => { if (event.target.id === 'celebrate') event.currentTarget.classList.remove('show'); });
-document.getElementById('clearStreakButton').addEventListener('click', () => {
-  if (!confirm('¿Eliminar la racha actual y la mejor racha?')) return;
-  state.streak = 0;
-  state.best = 0;
-  saveState();
-  render();
-  document.getElementById('celebrate').classList.remove('show');
-});
-document.getElementById('clearTotalButton').addEventListener('click', () => {
-  if (!confirm('¿Borrar toda la información de estadísticas?')) return;
-  state.goals.forEach(goal => goal.done = false);
-  state.streak = 0;
-  state.best = 0;
-  state.total = 0;
-  state.completedAll = false;
-  state.dayQualified = false;
-  state.history = [];
-  saveState();
-  render();
-});
-
 document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 window.addEventListener('resize', drawChart);
 render();
