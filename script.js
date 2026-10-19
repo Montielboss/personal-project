@@ -1,36 +1,62 @@
 const STORAGE_KEY = 'modo-vida-save-v1';
 const todayKey = new Date().toISOString().slice(0, 10);
 const QUALIFICATION_PERCENT = 70;
-const defaultGoals = [
-  { id: crypto.randomUUID(), text: 'Mover mi cuerpo durante 20 minutos', done: false },
-  { id: crypto.randomUUID(), text: 'Tomar suficiente agua', done: false },
-  { id: crypto.randomUUID(), text: 'Hacer una cosa importante sin distraerme', done: false }
-];
-let state = loadState();
+
+function makeId() { return crypto.randomUUID(); }
+function makeDefaultSections() {
+  return [
+    { id: makeId(), name: 'Mañana', goals: [
+      { id: makeId(), text: 'Tender la cama', done: false },
+      { id: makeId(), text: 'Preparar café', done: false }
+    ] },
+    { id: makeId(), name: 'Tarde', goals: [
+      { id: makeId(), text: 'Mover mi cuerpo durante 20 minutos', done: false },
+      { id: makeId(), text: 'Tomar suficiente agua', done: false },
+      { id: makeId(), text: 'Hacer una cosa importante sin distraerme', done: false }
+    ] }
+  ];
+}
+
+function migrateSections(saved) {
+  if (saved?.sections?.length) return saved.sections;
+  if (saved?.goals?.length) return [{ id: makeId(), name: 'Mis objetivos', goals: saved.goals }];
+  return makeDefaultSections();
+}
+
+function resetSectionsForNewDay(sections) {
+  return sections.map(section => ({
+    ...section,
+    goals: section.goals.map(goal => ({ ...goal, done: false }))
+  }));
+}
 
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!saved || saved.date !== todayKey) {
       const previous = saved?.dayQualified || saved?.completedAll ? saved.streak : 0;
-      return { date: todayKey, goals: defaultGoals, streak: previous, best: saved?.best || previous, total: saved?.total || 0, completedAll: false, dayQualified: false, history: saved?.history || [] };
+      return { date: todayKey, sections: resetSectionsForNewDay(migrateSections(saved)), streak: previous, best: saved?.best || previous, total: saved?.total || 0, completedAll: false, dayQualified: false, history: saved?.history || [] };
     }
+    saved.sections = migrateSections(saved);
     saved.history = saved.history || [];
     saved.dayQualified = saved.dayQualified ?? saved.completedAll ?? false;
     saved.completedAll = saved.dayQualified;
     return saved;
   } catch {
-    return { date: todayKey, goals: defaultGoals, streak: 0, best: 0, total: 0, completedAll: false, dayQualified: false, history: [] };
+    return { date: todayKey, sections: makeDefaultSections(), streak: 0, best: 0, total: 0, completedAll: false, dayQualified: false, history: [] };
   }
 }
 
+let state = loadState();
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-function completedCount() { return state.goals.filter(goal => goal.done).length; }
-function completionPercent() { return state.goals.length ? Math.round(completedCount() / state.goals.length * 100) : 0; }
-function qualifiesForStreak() { return state.goals.length > 0 && completionPercent() >= QUALIFICATION_PERCENT; }
+function allGoals() { return state.sections.flatMap(section => section.goals); }
+function completedCount() { return allGoals().filter(goal => goal.done).length; }
+function completionPercent() { return allGoals().length ? Math.round(completedCount() / allGoals().length * 100) : 0; }
+function qualifiesForStreak() { return allGoals().length > 0 && completionPercent() >= QUALIFICATION_PERCENT; }
+function findGoal(id) { for (const section of state.sections) { const goal = section.goals.find(item => item.id === id); if (goal) return goal; } return null; }
 
 function updateHistory() {
-  const record = { date: state.date, completed: completedCount(), total: state.goals.length, qualified: state.dayQualified };
+  const record = { date: state.date, completed: completedCount(), total: allGoals().length, qualified: state.dayQualified };
   const index = state.history.findIndex(item => item.date === state.date);
   if (index >= 0) state.history[index] = record;
   else state.history.push(record);
@@ -77,48 +103,66 @@ function drawChart() {
   });
 }
 
-function renderGoalList(listId) {
-  const list = document.getElementById(listId);
-  list.innerHTML = '';
-  if (!state.goals.length) {
-    const message = listId === 'goalListHome' ? 'Tu día empieza con una intención.<br />Añade tu primer objetivo desde Editar objetivos.' : 'Tu día empieza con una intención.<br />Añade tu primer objetivo abajo.';
-    list.innerHTML = `<div class="empty">${message}</div>`;
+function renderGoal(goal, editor) {
+  const item = document.createElement('div');
+  item.className = `goal ${goal.done ? 'done' : ''}`;
+  item.innerHTML = `<button class="check" ${goal.done || state.completedAll ? 'disabled' : ''} aria-label="${goal.done ? 'Objetivo completado por hoy' : 'Completar objetivo'}" data-action="toggle"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.3"><path d="m3 8 3.1 3L13 4.5"/></svg></button><span class="goal-name"></span>${editor ? `<button class="goal-x" ${state.completedAll ? 'disabled' : ''} aria-label="Eliminar objetivo" data-action="remove">×</button>` : ''}`;
+  item.querySelector('.goal-name').textContent = goal.text;
+  item.querySelector('[data-action="toggle"]').addEventListener('click', () => toggleGoal(goal.id));
+  item.querySelector('[data-action="remove"]')?.addEventListener('click', () => removeGoal(goal.id));
+  return item;
+}
+
+function renderSections(containerId, editor) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  if (!state.sections.length) {
+    container.innerHTML = '<div class="empty">Añade un apartado para organizar tu día.</div>';
+    return;
   }
-  state.goals.forEach(goal => {
-    const item = document.createElement('div');
-    item.className = `goal ${goal.done ? 'done' : ''}`;
-    item.innerHTML = `<button class="check" ${goal.done || state.completedAll ? 'disabled' : ''} aria-label="${goal.done ? 'Objetivo completado por hoy' : 'Completar objetivo'}" data-action="toggle"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.3"><path d="m3 8 3.1 3L13 4.5"/></svg></button><span class="goal-name"></span><button class="goal-x" ${state.completedAll ? 'disabled' : ''} aria-label="Eliminar objetivo" data-action="remove">×</button>`;
-    item.querySelector('.goal-name').textContent = goal.text;
-    item.querySelector('[data-action="toggle"]').addEventListener('click', () => toggleGoal(goal.id));
-    item.querySelector('[data-action="remove"]').addEventListener('click', () => removeGoal(goal.id));
-    list.appendChild(item);
+  state.sections.forEach(section => {
+    const block = document.createElement('section');
+    block.className = 'goal-section';
+    block.innerHTML = `<div class="section-heading"><h3>${section.name}</h3>${editor ? '<button class="section-x" type="button" aria-label="Eliminar apartado">×</button>' : ''}</div><div class="goal-list"></div>`;
+    const list = block.querySelector('.goal-list');
+    if (!section.goals.length) list.innerHTML = '<div class="section-empty">Sin objetivos en este apartado.</div>';
+    section.goals.forEach(goal => list.appendChild(renderGoal(goal, editor)));
+    block.querySelector('.section-x')?.addEventListener('click', () => removeSection(section.id));
+    container.appendChild(block);
   });
 }
 
+function renderSectionSelect() {
+  const select = document.getElementById('goalSection');
+  select.innerHTML = state.sections.map(section => `<option value="${section.id}">${section.name}</option>`).join('');
+  select.disabled = state.completedAll || !state.sections.length;
+}
+
 function render() {
-  renderGoalList('goalListHome');
-  renderGoalList('goalListEditor');
+  renderSections('goalSectionsHome', false);
+  renderSections('goalSectionsEditor', true);
+  renderSectionSelect();
   const completed = completedCount();
   const percent = completionPercent();
-  document.getElementById('progressText').textContent = `${completed} de ${state.goals.length} completados`;
+  document.getElementById('progressText').textContent = `${completed} de ${allGoals().length} completados`;
   document.getElementById('progressPercent').textContent = `${percent}%`;
   document.getElementById('progressFill').style.width = `${percent}%`;
-  document.getElementById('homeProgressText').textContent = `${completed} de ${state.goals.length} completados`;
+  document.getElementById('homeProgressText').textContent = `${completed} de ${allGoals().length} completados`;
   document.getElementById('homeProgressPercent').textContent = `${percent}%`;
   document.getElementById('homeProgressFill').style.width = `${percent}%`;
   document.getElementById('streakValue').textContent = state.streak;
   document.getElementById('bestValue').textContent = `${state.best} días`;
   document.getElementById('totalValue').textContent = state.total;
   document.getElementById('xpValue').textContent = `${completed * 25} XP`;
-  document.getElementById('goalInput').disabled = state.completedAll;
-  document.getElementById('goalInput').placeholder = state.completedAll ? 'Objetivos bloqueados hasta mañana.' : 'Añade un objetivo para hoy...';
-  document.querySelector('#goalForm button').disabled = state.completedAll;
+  document.getElementById('goalInput').disabled = state.completedAll || !state.sections.length;
+  document.getElementById('goalInput').placeholder = state.completedAll ? 'Objetivos bloqueados hasta mañana.' : 'Añade un objetivo...';
+  document.querySelector('#goalForm button').disabled = state.completedAll || !state.sections.length;
   document.getElementById('statusDot').classList.toggle('on', state.dayQualified);
   drawChart();
 }
 
 function toggleGoal(id) {
-  const goal = state.goals.find(item => item.id === id);
+  const goal = findGoal(id);
   if (!goal || goal.done || state.completedAll) return;
   goal.done = true;
   state.total++;
@@ -139,8 +183,16 @@ function toggleGoal(id) {
 }
 
 function removeGoal(id) {
-  state.goals = state.goals.filter(goal => goal.id !== id);
+  state.sections.forEach(section => { section.goals = section.goals.filter(goal => goal.id !== id); });
   if (!state.dayQualified) state.completedAll = false;
+  updateHistory();
+  saveState();
+  render();
+}
+
+function removeSection(id) {
+  if (state.completedAll) return;
+  state.sections = state.sections.filter(section => section.id !== id);
   updateHistory();
   saveState();
   render();
@@ -157,9 +209,7 @@ function openPage(pageId) {
     page.hidden = !active;
     page.classList.toggle('active', active);
   });
-  document.querySelectorAll('.menu-link, [data-page].primary-action').forEach(link => {
-    if (link.classList.contains('menu-link')) link.classList.toggle('active', link.dataset.page === pageId);
-  });
+  document.querySelectorAll('.menu-link').forEach(link => link.classList.toggle('active', link.dataset.page === pageId));
   document.getElementById('mainMenu').classList.remove('open');
   document.getElementById('menuButton').setAttribute('aria-expanded', 'false');
   if (pageId === 'statsPage') drawChart();
@@ -172,16 +222,26 @@ document.getElementById('menuButton').addEventListener('click', () => {
   document.getElementById('menuButton').setAttribute('aria-expanded', String(isOpen));
 });
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
-}
+document.getElementById('sectionForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const input = document.getElementById('sectionName');
+  const name = input.value.trim();
+  if (!name || state.completedAll) return;
+  state.sections.push({ id: makeId(), name, goals: [] });
+  input.value = '';
+  saveState();
+  render();
+  input.focus();
+});
 
 document.getElementById('goalForm').addEventListener('submit', event => {
   event.preventDefault();
   const input = document.getElementById('goalInput');
+  const sectionId = document.getElementById('goalSection').value;
   const text = input.value.trim();
-  if (!text || state.completedAll) return;
-  state.goals.push({ id: crypto.randomUUID(), text, done: false });
+  const section = state.sections.find(item => item.id === sectionId) || state.sections[0];
+  if (!text || !section || state.completedAll) return;
+  section.goals.push({ id: makeId(), text, done: false });
   updateHistory();
   input.value = '';
   saveState();
