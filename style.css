@@ -90,8 +90,22 @@ h1 { margin: 0; font-size: clamp(42px, 7vw, 79px); line-height: .94; letter-spac
 .goal-x:hover { color: var(--danger); }
 .goal-x:disabled { cursor: default; opacity: .35; }
 .empty { padding: 30px 15px; border: 1px dashed var(--line-strong); border-radius: 14px; color: var(--muted); text-align: center; font-size: 14px; }
+.goal-section { margin-top: 22px; }
+.goal-section:first-child { margin-top: 0; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+.section-heading h3 { margin: 0; color: var(--text); font-size: 16px; letter-spacing: -.03em; }
+.section-x { width: 25px; height: 25px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: #666; font-size: 18px; }
+.section-x:hover { color: var(--danger); background: #241616; }
+.section-empty { padding: 14px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); font-size: 13px; }
+.section-form { display: flex; gap: 9px; margin: 0 0 17px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.section-form input, .add-form select { min-width: 0; padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; outline: none; background: #0d0d0d; color: var(--text); font-size: 14px; }
+.section-form input { flex: 1; }
+.section-form input:focus, .add-form select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #d8ff4f15; }
+.section-form button { padding: 0 15px; border: 0; border-radius: 11px; background: #242a13; color: var(--accent); font-weight: 700; }
+.section-form button:hover { background: #303b16; }
 
 .add-form { display: flex; gap: 9px; margin-top: 17px; }
+.add-form select { flex: 0 0 150px; }
 .add-form input { flex: 1; min-width: 0; padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; outline: none; background: #0d0d0d; color: var(--text); font-size: 14px; }
 .add-form input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #d8ff4f15; }
 .add-form button, .reset { border: 0; border-radius: 11px; font-weight: 750; transition: .2s ease; }
@@ -157,6 +171,8 @@ h1 { margin: 0; font-size: clamp(42px, 7vw, 79px); line-height: .94; letter-spac
   .today { display: none; }
   .goals-card, .streak-card, .stats-card { padding: 21px; }
   .add-form { flex-wrap: wrap; }
+  .section-form { flex-wrap: wrap; }
+  .section-form input, .section-form button, .add-form select { width: 100%; height: 45px; }
   .add-form button { height: 45px; width: 100%; }
 }
 .menu-button { display: grid; gap: 4px; width: 36px; height: 36px; padding: 9px 7px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text); }
