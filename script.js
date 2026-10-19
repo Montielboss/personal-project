@@ -330,6 +330,26 @@ document.getElementById('cancelDelete').addEventListener('click', () => {
 document.getElementById('deleteConfirm').addEventListener('click', event => {
   if (event.target.id === 'deleteConfirm') document.getElementById('cancelDelete').click();
 });
+document.getElementById('clearStreakButton').addEventListener('click', () => {
+  if (!confirm('¿Eliminar la racha actual y la mejor racha?')) return;
+  state.streak = 0;
+  state.best = 0;
+  saveState();
+  render();
+  document.getElementById('celebrate').classList.remove('show');
+});
+document.getElementById('clearTotalButton').addEventListener('click', () => {
+  if (!confirm('¿Borrar toda la información de estadísticas?')) return;
+  state.sections.forEach(section => section.goals.forEach(goal => goal.done = false));
+  state.streak = 0;
+  state.best = 0;
+  state.total = 0;
+  state.completedAll = false;
+  state.dayQualified = false;
+  state.history = [];
+  saveState();
+  render();
+});
 document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 window.addEventListener('resize', drawChart);
 render();
