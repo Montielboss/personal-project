@@ -159,6 +159,16 @@ function renderGoal(goal, editor) {
   item.innerHTML = `<button class="check" ${goal.done || state.completedAll ? 'disabled' : ''} aria-label="${goal.done ? 'Objetivo completado por hoy' : 'Completar objetivo'}" data-action="toggle"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.3"><path d="m3 8 3.1 3L13 4.5"/></svg></button><span class="goal-name"></span>${editor ? `<button class="goal-x" ${state.completedAll ? 'disabled' : ''} aria-label="Eliminar objetivo" data-action="remove">×</button>` : ''}`;
   item.querySelector('.goal-name').textContent = goal.text;
   item.querySelector('[data-action="toggle"]').addEventListener('click', () => toggleGoal(goal.id));
+  if (editor && !state.completedAll) {
+    const editButton = document.createElement('button');
+    editButton.className = 'goal-edit';
+    editButton.type = 'button';
+    editButton.setAttribute('aria-label', 'Editar objetivo');
+    editButton.dataset.action = 'edit';
+    editButton.textContent = '✎';
+    editButton.addEventListener('click', () => editGoal(goal.id));
+    item.querySelector('.goal-name').after(editButton);
+  }
   item.querySelector('[data-action="remove"]')?.addEventListener('click', () => removeGoal(goal.id));
   return item;
 }
@@ -175,6 +185,15 @@ function renderSections(containerId, editor) {
     block.className = 'goal-section';
     block.innerHTML = `<div class="section-heading"><h3>${section.name}</h3>${editor ? '<button class="section-x" type="button" aria-label="Eliminar apartado">×</button>' : ''}</div><div class="goal-list"></div>`;
     const list = block.querySelector('.goal-list');
+    if (editor && !state.completedAll) {
+      const editButton = document.createElement('button');
+      editButton.className = 'section-edit';
+      editButton.type = 'button';
+      editButton.setAttribute('aria-label', 'Editar apartado');
+      editButton.textContent = '✎';
+      editButton.addEventListener('click', () => editSection(section.id));
+      block.querySelector('.section-heading').append(editButton);
+    }
     if (!section.goals.length) list.innerHTML = '<div class="section-empty">Sin objetivos en este apartado.</div>';
     section.goals.forEach(goal => list.appendChild(renderGoal(goal, editor)));
     block.querySelector('.section-x')?.addEventListener('click', () => removeSection(section.id));
@@ -238,6 +257,30 @@ function toggleGoal(id) {
 function removeGoal(id) {
   state.sections.forEach(section => { section.goals = section.goals.filter(goal => goal.id !== id); });
   if (!state.dayQualified) state.completedAll = false;
+  updateHistory();
+  saveState();
+  render();
+}
+
+function editGoal(id) {
+  if (state.completedAll) return;
+  const goal = findGoal(id);
+  if (!goal) return;
+  const text = prompt('Edita el objetivo:', goal.text)?.trim();
+  if (!text || text === goal.text) return;
+  goal.text = text.slice(0, 80);
+  updateHistory();
+  saveState();
+  render();
+}
+
+function editSection(id) {
+  if (state.completedAll) return;
+  const section = state.sections.find(item => item.id === id);
+  if (!section) return;
+  const name = prompt('Edita el nombre del apartado:', section.name)?.trim();
+  if (!name || name === section.name) return;
+  section.name = name.slice(0, 40);
   updateHistory();
   saveState();
   render();
