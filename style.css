@@ -244,19 +244,18 @@ body.goal-dragging, body.goal-dragging * { cursor: grabbing !important; }
 .menu-link:hover, .menu-link.active { background: #242a13; color: var(--text); }
 .menu-link.active span { color: var(--accent); }
 
-/* Fuego que brota hacia arriba desde el círculo de racha */
-.fire { position: absolute; left: 50%; top: 50%; z-index: 0; width: 0; height: 0; pointer-events: none; filter: blur(.5px) drop-shadow(0 0 10px #ff6b35aa); }
-.fire::before { position: absolute; left: -150px; top: -135px; width: 300px; height: 300px; content: ""; background: radial-gradient(circle at 50% 58%, #ff6b3566 0, #ff6b3528 42%, transparent 70%); animation: fire-breathe 2.2s ease-in-out infinite; }
+/* Fuego estilo Firebase que brota hacia arriba desde el círculo de racha */
+.fire { position: absolute; left: 50%; top: 50%; z-index: 0; width: 0; height: 0; pointer-events: none; filter: drop-shadow(0 0 9px #ffa00099); }
+.fire::before { position: absolute; left: -150px; top: -135px; width: 300px; height: 300px; content: ""; background: radial-gradient(circle at 50% 58%, #ffa00060 0, #ffa00024 42%, transparent 70%); animation: fire-breathe 2.2s ease-in-out infinite; }
 .fire i { position: absolute; left: 0; top: 0; width: 0; height: 0; transform: translate(var(--x), var(--y)); }
+.fire i:nth-child(even) { scale: -1 1; }
 .fire b {
   position: absolute; left: calc(var(--w) / -2); bottom: 0;
   width: var(--w); height: var(--h);
-  background: linear-gradient(to top, #fff1b0 0%, #ffd166 20%, #ff7a2f 58%, #c2331c 100%);
-  clip-path: polygon(56% 0, 60% 20%, 78% 42%, 94% 70%, 82% 94%, 50% 100%, 18% 94%, 6% 70%, 22% 44%, 40% 22%);
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 80' preserveAspectRatio='none'><defs><linearGradient id='a' x1='0' y1='1' x2='0' y2='0'><stop offset='0' stop-color='%23F57C00'/><stop offset='.55' stop-color='%23FFA000'/><stop offset='1' stop-color='%23FFCA28'/></linearGradient></defs><path fill='url(%23a)' d='M20 80C6 80 0 66 4 52C7 42 14 36 15 26C16 18 14 10 24 0C24 10 31 17 35 31C39 45 38 57 34 66C31 74 26 80 20 80Z'/><path fill='%23FFE082' d='M20 80C12 80 9 71 13 63C16 57 21 52 21 44C27 51 31 60 29 68C27 75 24 80 20 80Z'/></svg>") center / 100% 100% no-repeat;
   transform-origin: 50% 100%;
   animation: flame-flicker var(--t) ease-in-out var(--d) infinite;
 }
-.fire i:nth-child(even) b { background: linear-gradient(to top, #ffe9a0 0%, #ff9f1c 38%, #e8451e 78%, #8f1d14 100%); opacity: .93; }
 
 @keyframes flame-flicker {
   0%, 100% { transform: scale(1, 1) skewX(0deg); }
