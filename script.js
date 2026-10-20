@@ -466,5 +466,25 @@ document.getElementById('clearTotalButton').addEventListener('click', () => {
   render();
 });
 document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+function buildFire() {
+  const fire = document.getElementById('fire');
+  if (!fire) return;
+  const count = 48;
+  for (let n = 0; n < count; n++) {
+    const wave = Math.abs(Math.sin(n * 2.399));
+    const tall = n % 3 !== 1;
+    const gust = 0.5 + Math.abs(Math.sin(n * 1.7 + 1));
+    const flame = document.createElement('i');
+    flame.style.setProperty('--a', `${(360 / count) * n}deg`);
+    const b = document.createElement('b');
+    b.style.setProperty('--w', `${15 + wave * 8}px`);
+    b.style.setProperty('--h', `${Math.min(44, ((tall ? 26 : 16) + wave * 12) * gust)}px`);
+    b.style.setProperty('--t', `${(0.7 + wave * 0.7).toFixed(2)}s`);
+    b.style.setProperty('--d', `-${(wave * 1.6 + n * 0.11).toFixed(2)}s`);
+    flame.appendChild(b);
+    fire.appendChild(flame);
+  }
+}
+buildFire();
 render();
 startCloudSync();
