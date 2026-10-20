@@ -53,6 +53,64 @@ let state = loadState();
 let sectionToDelete = null;
 let cloudUser = null;
 let cloudSyncStarted = false;
+let goalDrag = null;
+
+function cancelGoalDrag() {
+  if (!goalDrag) return;
+  clearTimeout(goalDrag.timer);
+  goalDrag.item.classList.remove('dragging');
+  goalDrag.list.classList.remove('drag-active');
+  if (goalDrag.item.hasPointerCapture?.(goalDrag.pointerId)) goalDrag.item.releasePointerCapture(goalDrag.pointerId);
+  goalDrag = null;
+  document.body.classList.remove('goal-dragging');
+}
+
+function finishGoalDrag() {
+  if (!goalDrag?.active) {
+    if (goalDrag) cancelGoalDrag();
+    return;
+  }
+  const { item, list, sectionId } = goalDrag;
+  const order = [...list.querySelectorAll('.goal[data-goal-id]')].map(goal => goal.dataset.goalId);
+  const section = state.sections.find(candidate => candidate.id === sectionId);
+  if (section) {
+    const goalsById = new Map(section.goals.map(goal => [goal.id, goal]));
+    section.goals = order.map(id => goalsById.get(id)).filter(Boolean);
+    updateHistory();
+    saveState();
+  }
+  cancelGoalDrag();
+  render();
+}
+
+function moveGoalWhileDragging(event) {
+  if (!goalDrag?.active) return;
+  const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.goal');
+  if (!target || target === goalDrag.item || target.parentElement !== goalDrag.list) return;
+  const targetBox = target.getBoundingClientRect();
+  const insertAfter = event.clientY > targetBox.top + targetBox.height / 2;
+  goalDrag.list.insertBefore(goalDrag.item, insertAfter ? target.nextSibling : target);
+}
+
+function startGoalDrag(event, item, list, sectionId) {
+  if (state.completedAll || !list || event.button > 0 || event.target.closest('button')) return;
+  const pointerId = event.pointerId;
+  goalDrag = {
+    item,
+    list,
+    sectionId,
+    pointerId,
+    active: false,
+    timer: setTimeout(() => {
+      if (!goalDrag || goalDrag.pointerId !== pointerId) return;
+      goalDrag.active = true;
+      item.classList.add('dragging');
+      list.classList.add('drag-active');
+      document.body.classList.add('goal-dragging');
+      item.setPointerCapture?.(pointerId);
+    }, 350)
+  };
+}
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   syncStateToCloud();
@@ -153,9 +211,10 @@ function renderObjectiveCharts() {
   });
 }
 
-function renderGoal(goal, editor) {
+function renderGoal(goal, editor, sectionId) {
   const item = document.createElement('div');
   item.className = `goal ${goal.done ? 'done' : ''}`;
+  item.dataset.goalId = goal.id;
   item.innerHTML = `<button class="check" ${goal.done || state.completedAll ? 'disabled' : ''} aria-label="${goal.done ? 'Objetivo completado por hoy' : 'Completar objetivo'}" data-action="toggle"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.3"><path d="m3 8 3.1 3L13 4.5"/></svg></button><span class="goal-name"></span>${editor ? `<button class="goal-x" ${state.completedAll ? 'disabled' : ''} aria-label="Eliminar objetivo" data-action="remove">×</button>` : ''}`;
   item.querySelector('.goal-name').textContent = goal.text;
   item.querySelector('[data-action="toggle"]').addEventListener('click', () => toggleGoal(goal.id));
@@ -170,6 +229,12 @@ function renderGoal(goal, editor) {
     item.querySelector('.goal-name').after(editButton);
   }
   item.querySelector('[data-action="remove"]')?.addEventListener('click', () => removeGoal(goal.id));
+  if (editor && !state.completedAll) {
+    item.addEventListener('pointerdown', event => startGoalDrag(event, item, item.parentElement, sectionId));
+    item.addEventListener('pointermove', moveGoalWhileDragging);
+    item.addEventListener('pointerup', finishGoalDrag);
+    item.addEventListener('pointercancel', cancelGoalDrag);
+  }
   return item;
 }
 
@@ -195,7 +260,7 @@ function renderSections(containerId, editor) {
       block.querySelector('.section-heading').append(editButton);
     }
     if (!section.goals.length) list.innerHTML = '<div class="section-empty">Sin objetivos en este apartado.</div>';
-    section.goals.forEach(goal => list.appendChild(renderGoal(goal, editor)));
+    section.goals.forEach(goal => list.appendChild(renderGoal(goal, editor, section.id)));
     block.querySelector('.section-x')?.addEventListener('click', () => removeSection(section.id));
     container.appendChild(block);
   });
