@@ -2,7 +2,7 @@ import { auth, db, doc, getDoc, setDoc, GoogleAuthProvider, signInWithPopup, sig
 
 const STORAGE_KEY = 'modo-vida-save-v1';
 const todayKey = new Date().toISOString().slice(0, 10);
-const QUALIFICATION_PERCENT = 70;
+const QUALIFICATION_PERCENT = 85;
 
 function makeId() { return crypto.randomUUID(); }
 function makeDefaultSections() {
@@ -104,50 +104,52 @@ function qualifiesForStreak() { return allGoals().length > 0 && completionPercen
 function findGoal(id) { for (const section of state.sections) { const goal = section.goals.find(item => item.id === id); if (goal) return goal; } return null; }
 
 function updateHistory() {
-  const record = { date: state.date, completed: completedCount(), total: allGoals().length, qualified: state.dayQualified };
+  const record = {
+    date: state.date,
+    completed: completedCount(),
+    total: allGoals().length,
+    qualified: state.dayQualified,
+    sections: state.sections.map(section => ({ id: section.id, name: section.name, completed: section.goals.filter(goal => goal.done).length, total: section.goals.length }))
+  };
   const index = state.history.findIndex(item => item.date === state.date);
   if (index >= 0) state.history[index] = record;
   else state.history.push(record);
   state.history = state.history.slice(-30);
 }
 
-function drawChart() {
-  const canvas = document.getElementById('completionChart');
-  const empty = document.getElementById('chartEmpty');
-  const records = Array.from({ length: 7 }, (_, offset) => {
+function renderObjectiveCharts() {
+  const container = document.getElementById('objectiveCharts');
+  container.innerHTML = '';
+  const charts = [{ id: 'general', name: 'General' }, ...state.sections.map(section => ({ id: section.id, name: section.name }))];
+  const days = Array.from({ length: 7 }, (_, offset) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - offset));
     const key = date.toISOString().slice(0, 10);
-    return state.history.find(item => item.date === key) || { date: key, completed: 0 };
+    const saved = state.history.find(item => item.date === key);
+    if (key === state.date) {
+      return { date: key, completed: completedCount(), total: allGoals().length, sections: state.sections.map(section => ({ id: section.id, completed: section.goals.filter(goal => goal.done).length, total: section.goals.length })) };
+    }
+    return saved || { date: key, completed: 0, total: 0, sections: [] };
   });
-  const hasData = records.some(item => item.completed > 0);
-  empty.hidden = hasData;
-  canvas.hidden = !hasData;
-  if (!hasData) return;
-  const ratio = window.devicePixelRatio || 1;
-  const width = canvas.clientWidth;
-  const height = 180;
-  canvas.width = width * ratio;
-  canvas.height = height * ratio;
-  const ctx = canvas.getContext('2d');
-  ctx.scale(ratio, ratio);
-  const max = Math.max(1, ...records.map(item => item.completed));
-  const slot = (width - 42) / records.length;
-  const barWidth = Math.min(30, slot - 9);
-  records.forEach((item, index) => {
-    const x = 21 + index * slot + (slot - barWidth) / 2;
-    const barHeight = item.completed ? Math.max(8, item.completed / max * 122) : 2;
-    const y = 140 - barHeight;
-    ctx.fillStyle = '#d8ff4f';
-    ctx.beginPath();
-    ctx.roundRect(x, y, barWidth, barHeight, 5);
-    ctx.fill();
-    ctx.fillStyle = '#8d8d89';
-    ctx.font = '11px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText(item.completed, x + barWidth / 2, y - 7);
-    const label = new Intl.DateTimeFormat('es-MX', { weekday: 'short' }).format(new Date(`${item.date}T12:00:00`)).replace('.', '');
-    ctx.fillText(label, x + barWidth / 2, 162);
+  charts.forEach(chart => {
+    const values = days.map(day => chart.id === 'general' ? day.completed : day.sections?.find(section => section.id === chart.id)?.completed || 0);
+    const total = values.reduce((sum, value) => sum + value, 0);
+    const max = Math.max(1, ...values);
+    const card = document.createElement('article');
+    card.className = 'card objective-chart';
+    card.innerHTML = `<div class="chart-heading"><div><h2 class="card-title"></h2><p class="card-subtitle">${total} objetivos completados en los últimos 7 días</p></div></div><div class="objective-bars" aria-label="Progreso de los últimos 7 días"></div><div class="chart-legend"><span><i class="legend-completed"></i>Objetivos completados</span></div>`;
+    card.querySelector('.card-title').textContent = chart.name;
+    const bars = card.querySelector('.objective-bars');
+    days.forEach((day, index) => {
+      const column = document.createElement('div');
+      column.className = 'bar-column';
+      const value = values[index];
+      column.title = `${value} objetivos completados`;
+      column.innerHTML = `<div class="objective-bar"><div class="objective-bar-fill"></div><strong class="bar-value">${value}</strong></div><span>${new Intl.DateTimeFormat('es-MX', { weekday: 'short' }).format(new Date(`${day.date}T12:00:00`)).replace('.', '')}</span>`;
+      column.querySelector('.objective-bar-fill').style.height = `${value ? Math.max(8, value / max * 100) : 3}%`;
+      bars.appendChild(column);
+    });
+    container.appendChild(card);
   });
 }
 
@@ -198,6 +200,9 @@ function render() {
   document.getElementById('homeProgressText').textContent = `${completed} de ${allGoals().length} completados`;
   document.getElementById('homeProgressPercent').textContent = `${percent}%`;
   document.getElementById('homeProgressFill').style.width = `${percent}%`;
+  document.getElementById('streakProgress').textContent = `${percent}%`;
+  document.getElementById('progressRing').style.setProperty('--progress-angle', `${percent * 3.6}deg`);
+  document.getElementById('progressRing').setAttribute('aria-valuenow', percent);
   document.getElementById('streakValue').textContent = state.streak;
   document.getElementById('bestValue').textContent = `${state.best} días`;
   document.getElementById('totalValue').textContent = state.total;
@@ -206,7 +211,7 @@ function render() {
   document.getElementById('goalInput').placeholder = state.completedAll ? 'Objetivos bloqueados hasta mañana.' : 'Añade un objetivo...';
   document.querySelector('#goalForm button').disabled = state.completedAll || !state.sections.length;
   document.getElementById('statusDot').classList.toggle('on', state.dayQualified);
-  drawChart();
+  renderObjectiveCharts();
 }
 
 function toggleGoal(id) {
@@ -271,7 +276,7 @@ function openPage(pageId) {
   document.querySelectorAll('.menu-link').forEach(link => link.classList.toggle('active', link.dataset.page === pageId));
   document.getElementById('mainMenu').classList.remove('open');
   document.getElementById('menuButton').setAttribute('aria-expanded', 'false');
-  if (pageId === 'statsPage') drawChart();
+  if (pageId === 'statsPage') renderObjectiveCharts();
 }
 
 document.querySelectorAll('[data-page]').forEach(link => link.addEventListener('click', () => openPage(link.dataset.page)));
@@ -351,6 +356,5 @@ document.getElementById('clearTotalButton').addEventListener('click', () => {
   render();
 });
 document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
-window.addEventListener('resize', drawChart);
 render();
 startCloudSync();
