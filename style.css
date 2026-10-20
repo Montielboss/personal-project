@@ -117,6 +117,10 @@ h1 { margin: 0; font-size: clamp(42px, 7vw, 79px); line-height: .94; letter-spac
 
 .side { display: grid; gap: 16px; align-content: start; }
 .streak-card { position: relative; overflow: hidden; min-height: 220px; padding: 26px; }
+.streak-layout { display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 100%; }
+.progress-ring { position: relative; display: grid; flex: 0 0 104px; place-items: center; width: 104px; height: 104px; border-radius: 50%; background: conic-gradient(var(--accent) var(--progress-angle, 0deg), #292929 0); }
+.progress-ring::before { position: absolute; inset: 8px; content: ""; border-radius: 50%; background: var(--panel); }
+.progress-ring span { position: relative; z-index: 1; color: var(--text); font-size: 20px; font-weight: 750; letter-spacing: -.05em; }
 .streak-card::after { content: ""; position: absolute; width: 180px; height: 180px; right: -65px; bottom: -80px; border: 1px solid #3c461c; border-radius: 50%; box-shadow: 0 0 0 18px #1c220f, 0 0 0 19px #303819, 0 0 0 38px #13170b, 0 0 0 39px #272e15; opacity: .8; }
 .streak-label { color: var(--muted); font-size: 13px; }
 .streak-value { display: flex; align-items: baseline; gap: 9px; margin: 14px 0 12px; }
@@ -128,6 +132,24 @@ h1 { margin: 0; font-size: clamp(42px, 7vw, 79px); line-height: .94; letter-spac
 .stats-card { padding: 23px 26px; }
 .chart-card { padding: 23px 20px 16px; }
 .large-chart { max-width: 760px; padding: 27px 26px 20px; }
+.chart-card.large-chart { display: none; }
+.objective-charts { display: grid; gap: 16px; max-width: 760px; }
+.objective-chart { padding: 23px 26px 20px; }
+.objective-chart .chart-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.chart-percent { color: var(--accent); font-size: 20px; }
+.objective-bars { display: flex; align-items: end; justify-content: center; gap: clamp(10px, 4vw, 28px); min-height: 155px; margin: 18px 0 10px; padding: 0 12px; border-bottom: 1px solid var(--line); }
+.bar-column { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: end; max-width: 44px; height: 155px; gap: 8px; color: var(--muted); font-size: 11px; }
+.objective-bar { position: relative; display: flex; align-items: end; width: 100%; height: 130px; overflow: visible; border-radius: 8px 8px 3px 3px; background: #292929; }
+.objective-bar-fill { position: absolute; right: 0; bottom: 0; left: 0; height: 8px; border-radius: 8px 8px 3px 3px; background: var(--accent); transition: height .35s ease; }
+.objective-bar-fill.done { height: 100%; background: var(--accent); }
+.bar-value { position: absolute; top: -19px; right: 0; left: 0; color: var(--soft); font-size: 11px; text-align: center; }
+.objective-chart-track { height: 15px; margin: 19px 0 13px; overflow: hidden; border-radius: 99px; background: #292929; }
+.objective-chart-fill { width: 0; height: 100%; border-radius: inherit; background: var(--accent); transition: width .35s ease; }
+.chart-legend { display: flex; gap: 17px; color: var(--muted); font-size: 12px; }
+.chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.chart-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+.legend-completed { background: var(--accent); }
+.legend-pending { background: #292929; }
 .settings-card { max-width: 760px; margin-top: 16px; }
 .chart-heading { margin: 0 6px 8px; }
 #completionChart { display: block; width: 100%; height: 180px; }
