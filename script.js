@@ -378,6 +378,11 @@ function openPage(pageId) {
     page.hidden = !active;
     page.classList.toggle('active', active);
   });
+  const activePage = document.getElementById(pageId);
+  activePage.classList.remove('page-enter');
+  void activePage.offsetWidth;
+  activePage.classList.add('page-enter');
+  activePage.addEventListener('animationend', () => activePage.classList.remove('page-enter'), { once: true });
   document.querySelectorAll('.menu-link').forEach(link => link.classList.toggle('active', link.dataset.page === pageId));
   document.getElementById('mainMenu').classList.remove('open');
   document.getElementById('menuButton').setAttribute('aria-expanded', 'false');
