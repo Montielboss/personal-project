@@ -282,9 +282,6 @@ function render() {
   document.getElementById('progressPercent').textContent = `${percent}%`;
   document.getElementById('progressFill').style.width = `${percent}%`;
   document.getElementById('homeProgressText').textContent = `${completed} de ${allGoals().length} completados`;
-  document.getElementById('homeProgressPercent').textContent = `${percent}%`;
-  document.getElementById('homeProgressFill').style.width = `${percent}%`;
-  document.getElementById('streakProgress').textContent = `${percent}%`;
   document.getElementById('progressRing').style.setProperty('--progress-angle', `${percent * 3.6}deg`);
   document.getElementById('progressRing').setAttribute('aria-valuenow', percent);
   document.getElementById('streakValue').textContent = state.streak;
