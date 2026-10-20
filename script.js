@@ -1,7 +1,12 @@
 import { auth, db, doc, getDoc, setDoc, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from './firebase-config.js';
 
 const STORAGE_KEY = 'modo-vida-save-v1';
-const todayKey = new Date().toISOString().slice(0, 10);
+function dateKey(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 const QUALIFICATION_PERCENT = 85;
 
 function makeId() { return crypto.randomUUID(); }
@@ -32,20 +37,28 @@ function resetSectionsForNewDay(sections) {
   }));
 }
 
+function freshDay(saved) {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  // La racha solo continúa si ayer se calificó; si pasó más de un día sin entrar, se reinicia.
+  const continued = (saved?.dayQualified || saved?.completedAll) && saved?.date === dateKey(yesterday);
+  const previous = continued ? saved.streak : 0;
+  return { date: dateKey(), sections: resetSectionsForNewDay(migrateSections(saved)), streak: previous, best: saved?.best || previous, total: saved?.total || 0, completedAll: false, dayQualified: false, history: saved?.history || [] };
+}
+
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (!saved || saved.date !== todayKey) {
-      const previous = saved?.dayQualified || saved?.completedAll ? saved.streak : 0;
-      return { date: todayKey, sections: resetSectionsForNewDay(migrateSections(saved)), streak: previous, best: saved?.best || previous, total: saved?.total || 0, completedAll: false, dayQualified: false, history: saved?.history || [] };
-    }
+    // Partidas guardadas antes del arreglo usaban fecha UTC y pueden traer el "día siguiente".
+    if (saved && saved.date > dateKey()) saved.date = dateKey();
+    if (!saved || saved.date !== dateKey()) return freshDay(saved);
     saved.sections = migrateSections(saved);
     saved.history = saved.history || [];
     saved.dayQualified = saved.dayQualified ?? saved.completedAll ?? false;
     saved.completedAll = saved.dayQualified;
     return saved;
   } catch {
-    return { date: todayKey, sections: makeDefaultSections(), streak: 0, best: 0, total: 0, completedAll: false, dayQualified: false, history: [] };
+    return { date: dateKey(), sections: makeDefaultSections(), streak: 0, best: 0, total: 0, completedAll: false, dayQualified: false, history: [] };
   }
 }
 
@@ -111,6 +124,20 @@ function startGoalDrag(event, item, list, sectionId) {
     }, 350)
   };
 }
+function updateTodayLabel() {
+  document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+}
+
+function rolloverIfNewDay() {
+  if (state.date === dateKey()) return false;
+  updateHistory(); // guarda cómo terminó el día anterior
+  state = freshDay(state);
+  saveState();
+  updateTodayLabel();
+  render();
+  return true;
+}
+
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   syncStateToCloud();
@@ -140,8 +167,10 @@ async function startCloudSync() {
       const snapshot = await getDoc(doc(db, 'users', user.uid));
       if (snapshot.exists()) {
         state = { ...state, ...snapshot.data() };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        render();
+        if (!rolloverIfNewDay()) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          render();
+        }
       } else await syncStateToCloud();
     });
   } catch (error) {
@@ -182,7 +211,7 @@ function renderObjectiveCharts() {
   const days = Array.from({ length: 7 }, (_, offset) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - offset));
-    const key = date.toISOString().slice(0, 10);
+    const key = dateKey(date);
     const saved = state.history.find(item => item.date === key);
     if (key === state.date) {
       return { date: key, completed: completedCount(), total: allGoals().length, sections: state.sections.map(section => ({ id: section.id, completed: section.goals.filter(goal => goal.done).length, total: section.goals.length })) };
@@ -466,7 +495,6 @@ document.getElementById('clearTotalButton').addEventListener('click', () => {
   saveState();
   render();
 });
-document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 function buildFire() {
   const fire = document.getElementById('fire');
   if (!fire) return;
@@ -513,6 +541,11 @@ function setFireLevel(streak) {
   fire.style.setProperty('--fire-level', level.toFixed(2));
   fire.querySelectorAll('s').forEach(spark => { spark.hidden = Number(spark.dataset.k) > level; });
 }
+updateTodayLabel();
 buildFire();
 render();
 startCloudSync();
+setInterval(rolloverIfNewDay, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) rolloverIfNewDay(); });
+window.addEventListener('focus', rolloverIfNewDay);
+window.addEventListener('pageshow', rolloverIfNewDay);
