@@ -469,7 +469,7 @@ document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('es-
 function buildFire() {
   const fire = document.getElementById('fire');
   if (!fire) return;
-  const count = 56;
+  const count = 24;
   const radius = 100;
   for (let n = 0; n < count; n++) {
     const angle = (Math.PI * 2 * n) / count;
@@ -480,8 +480,8 @@ function buildFire() {
     flame.style.setProperty('--x', `${(Math.cos(angle) * radius).toFixed(1)}px`);
     flame.style.setProperty('--y', `${(Math.sin(angle) * radius + 6).toFixed(1)}px`);
     const b = document.createElement('b');
-    b.style.setProperty('--w', `${18 + wave * 10}px`);
-    b.style.setProperty('--h', `${Math.min(72, (30 + low * 40) * gust).toFixed(1)}px`);
+    b.style.setProperty('--w', `${34 + wave * 10}px`);
+    b.style.setProperty('--h', `${Math.min(84, (40 + low * 44) * gust).toFixed(1)}px`);
     b.style.setProperty('--t', `${(0.7 + wave * 0.7).toFixed(2)}s`);
     b.style.setProperty('--d', `-${(wave * 1.6 + n * 0.11).toFixed(2)}s`);
     flame.appendChild(b);
