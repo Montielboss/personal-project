@@ -31,10 +31,17 @@
 
       <main>
         <section class="page active" id="homePage">
-          <article class="card streak-card top-streak-card">
-            <span class="streak-label"><span class="status-dot" id="statusDot"></span>racha actual</span>
-            <div class="streak-value"><strong id="streakValue">0</strong><span>días</span></div>
-          </article>
+        <article class="card streak-card top-streak-card">
+          <div class="streak-layout">
+            <div>
+              <span class="streak-label"><span class="status-dot" id="statusDot"></span>racha actual</span>
+              <div class="streak-value"><strong id="streakValue">0</strong><span>días</span></div>
+            </div>
+            <div class="progress-ring" id="progressRing" role="progressbar" aria-label="Progreso de objetivos" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span id="streakProgress">0%</span>
+            </div>
+          </div>
+        </article>
           <section class="welcome hero">
             <p class="eyebrow">bienvenido a modo vida</p>
             <h1>Haz que tu día<br />cuente.</h1>
@@ -83,6 +90,7 @@
             <h2>Estadísticas</h2>
             <p>Observa cuántos objetivos has completado cada día.</p>
           </div>
+          <div class="objective-charts" id="objectiveCharts" aria-label="Gráficas de objetivos completados"></div>
           <article class="card chart-card large-chart">
             <div class="chart-heading"><div><h2 class="card-title">Objetivos por día</h2><p class="card-subtitle">Últimos 7 días</p></div></div>
             <canvas id="completionChart" height="220" aria-label="Gráfica de objetivos completados por día"></canvas>
