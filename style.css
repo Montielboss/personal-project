@@ -75,6 +75,10 @@ h1 { margin: 0; font-size: clamp(42px, 7vw, 79px); line-height: .94; letter-spac
   display: flex; align-items: center; gap: 13px; min-height: 64px; padding: 10px 11px 10px 14px;
   border: 1px solid transparent; border-radius: 14px; background: var(--panel-soft); transition: .2s ease;
 }
+.goal-list.drag-active { padding: 4px; margin: -4px; border-radius: 18px; background: #d8ff4f08; }
+.goal-list.drag-active .goal { touch-action: none; }
+.goal.dragging { position: relative; z-index: 2; border-color: var(--accent); background: #242a13; opacity: .82; box-shadow: 0 12px 28px #0008; }
+body.goal-dragging, body.goal-dragging * { cursor: grabbing !important; }
 .goal:hover { border-color: var(--line-strong); }
 .goal.done { background: #181d0b; border-color: #344313; }
 .check {
