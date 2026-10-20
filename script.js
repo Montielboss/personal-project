@@ -285,6 +285,7 @@ function render() {
   document.getElementById('progressRing').style.setProperty('--progress-angle', `${percent * 3.6}deg`);
   document.getElementById('progressRing').setAttribute('aria-valuenow', percent);
   document.getElementById('streakValue').textContent = state.streak;
+  setFireLevel(state.streak);
   document.getElementById('bestValue').textContent = `${state.best} días`;
   document.getElementById('totalValue').textContent = state.total;
   document.getElementById('xpValue').textContent = `${completed * 25} XP`;
@@ -487,6 +488,30 @@ function buildFire() {
     flame.appendChild(b);
     fire.appendChild(flame);
   }
+  const sparkCount = 22;
+  for (let n = 0; n < sparkCount; n++) {
+    const frac = (n * 0.618) % 1;
+    const angle = ((200 + 140 * frac) * Math.PI) / 180; // solo la mitad de arriba
+    const wave = Math.abs(Math.sin(n * 2.1 + 0.5));
+    const spark = document.createElement('s');
+    spark.dataset.k = (n / (sparkCount - 1)).toFixed(2);
+    spark.style.setProperty('--x', `${(Math.cos(angle) * (112 + wave * 16)).toFixed(1)}px`);
+    spark.style.setProperty('--y', `${(Math.sin(angle) * (112 + wave * 16)).toFixed(1)}px`);
+    spark.style.setProperty('--drift', `${(Math.cos(angle) * 16 + Math.sin(n * 3.1) * 12).toFixed(1)}px`);
+    spark.style.setProperty('--rise', `${((32 + wave * 40) * (1.2 - Math.abs(Math.sin(angle)) * 0.5)).toFixed(0)}px`);
+    spark.style.setProperty('--z', `${(3.5 + wave * 3).toFixed(1)}px`);
+    spark.style.setProperty('--t', `${(1.8 + wave * 1.4).toFixed(2)}s`);
+    spark.style.setProperty('--d', `-${(n * 0.37).toFixed(2)}s`);
+    fire.appendChild(spark);
+  }
+}
+
+function setFireLevel(streak) {
+  const fire = document.getElementById('fire');
+  if (!fire) return;
+  const level = Math.min(1, 0.35 + streak * 0.065); // casi apagado en 0 días, a tope en ~10
+  fire.style.setProperty('--fire-level', level.toFixed(2));
+  fire.querySelectorAll('s').forEach(spark => { spark.hidden = Number(spark.dataset.k) > level; });
 }
 buildFire();
 render();
