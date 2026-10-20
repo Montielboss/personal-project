@@ -136,8 +136,8 @@ body.goal-dragging, body.goal-dragging * { cursor: grabbing !important; }
 .progress-ring::after { display: none; }
 .progress-ring span { display: none; }
 .streak-card::before, .streak-card::after { position: absolute; left: 50%; width: 250px; height: 100px; content: ""; border: 3px solid transparent; border-radius: 50%; pointer-events: none; }
-.streak-card::before { top: 22px; border-top-color: #d8ff4f8c; box-shadow: 0 10px 0 -1px #d8ff4f66, 0 20px 0 -1px #d8ff4f3d, 0 30px 0 -1px #d8ff4f1f; filter: drop-shadow(0 0 7px #d8ff4f55); transform: translateX(-50%); animation: top-wave-card 3.2s ease-in-out infinite; }
-.streak-card::after { bottom: 22px; border-bottom-color: #d8ff4f8c; box-shadow: 0 -10px 0 -1px #d8ff4f66, 0 -20px 0 -1px #d8ff4f3d, 0 -30px 0 -1px #d8ff4f1f; filter: drop-shadow(0 0 7px #d8ff4f55); transform: translateX(-50%); animation: bottom-wave-card 3.2s ease-in-out infinite; }
+.streak-card::before { top: 22px; border-top-color: #ffd166; box-shadow: 0 10px 0 -1px #ff9d2eaa, 0 20px 0 -1px #ff6b3580, 0 30px 0 -1px #ff6b353d; filter: drop-shadow(0 0 8px #ff9d2e); transform: translateX(-50%); animation: top-wave-card 1.35s ease-in-out infinite; }
+.streak-card::after { bottom: 22px; border-bottom-color: #ff9d2e; box-shadow: 0 -10px 0 -1px #ff6b35aa, 0 -20px 0 -1px #ff6b3580, 0 -30px 0 -1px #ff6b353d; filter: drop-shadow(0 0 8px #ff6b35); transform: translateX(-50%); animation: bottom-wave-card 1.55s ease-in-out infinite reverse; }
 .streak-label { color: var(--muted); font-size: 13px; }
 .streak-value { display: flex; align-items: baseline; gap: 9px; margin: 0; }
 .streak-value strong { color: var(--text); font-size: clamp(48px, 8vw, 76px); line-height: .9; letter-spacing: -.09em; }
@@ -214,17 +214,21 @@ body.goal-dragging, body.goal-dragging * { cursor: grabbing !important; }
 }
 
 @keyframes top-wave-card {
-  0%, 100% { border-radius: 52% 48% 45% 55%; opacity: .72; transform: translateX(-50%) translateY(0) rotate(-2deg) scaleX(1); }
-  25% { border-radius: 43% 57% 52% 48%; transform: translateX(-50%) translateY(4px) rotate(0deg) scaleX(1.03); }
-  50% { border-radius: 60% 40% 48% 52%; opacity: 1; transform: translateX(-50%) translateY(7px) rotate(2deg) scaleX(.98); }
-  75% { border-radius: 47% 53% 58% 42%; transform: translateX(-50%) translateY(3px) rotate(0deg) scaleX(1.02); }
+  0% { border-radius: 52% 48% 45% 55%; opacity: .72; transform: translateX(-50%) translateY(1px) rotate(-2deg) scaleX(1); }
+  18% { border-radius: 43% 57% 52% 48%; opacity: 1; transform: translateX(-50%) translateY(-5px) rotate(1deg) scaleX(1.04); }
+  37% { border-radius: 64% 36% 48% 52%; opacity: .8; transform: translateX(-50%) translateY(6px) rotate(-1deg) scaleX(.96); }
+  61% { border-radius: 47% 53% 61% 39%; opacity: 1; transform: translateX(-50%) translateY(-3px) rotate(2deg) scaleX(1.02); }
+  83% { border-radius: 58% 42% 42% 58%; opacity: .76; transform: translateX(-50%) translateY(4px) rotate(-2deg) scaleX(.98); }
+  100% { border-radius: 52% 48% 45% 55%; opacity: .72; transform: translateX(-50%) translateY(1px) rotate(-2deg) scaleX(1); }
 }
 
 @keyframes bottom-wave-card {
-  0%, 100% { border-radius: 45% 55% 52% 48%; opacity: .72; transform: translateX(-50%) translateY(0) rotate(2deg) scaleX(1); }
-  25% { border-radius: 56% 44% 43% 57%; transform: translateX(-50%) translateY(-4px) rotate(0deg) scaleX(.98); }
-  50% { border-radius: 48% 52% 60% 40%; opacity: 1; transform: translateX(-50%) translateY(-7px) rotate(-2deg) scaleX(1.03); }
-  75% { border-radius: 58% 42% 47% 53%; transform: translateX(-50%) translateY(-3px) rotate(0deg) scaleX(1.01); }
+  0% { border-radius: 45% 55% 52% 48%; opacity: .72; transform: translateX(-50%) translateY(-1px) rotate(2deg) scaleX(1); }
+  22% { border-radius: 58% 42% 43% 57%; opacity: 1; transform: translateX(-50%) translateY(5px) rotate(-1deg) scaleX(.97); }
+  44% { border-radius: 48% 52% 63% 37%; opacity: .78; transform: translateX(-50%) translateY(-6px) rotate(2deg) scaleX(1.04); }
+  68% { border-radius: 63% 37% 47% 53%; opacity: 1; transform: translateX(-50%) translateY(3px) rotate(-2deg) scaleX(.98); }
+  86% { border-radius: 50% 50% 58% 42%; opacity: .8; transform: translateX(-50%) translateY(-4px) rotate(1deg) scaleX(1.02); }
+  100% { border-radius: 45% 55% 52% 48%; opacity: .72; transform: translateX(-50%) translateY(-1px) rotate(2deg) scaleX(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
