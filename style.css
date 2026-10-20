@@ -87,6 +87,8 @@ h1 { margin: 0; font-size: clamp(42px, 7vw, 79px); line-height: .94; letter-spac
 .check svg { width: 14px; height: 14px; opacity: 0; transform: scale(.5); transition: .2s ease; }
 .goal.done .check svg { opacity: 1; transform: scale(1); }
 .goal-name { flex: 1; color: var(--soft); font-size: 14px; transition: .2s ease; }
+.goal-edit { flex: 0 0 28px; opacity: 0; transition: .2s ease; }
+.goal:hover .goal-edit, .goal-edit:focus { opacity: 1; }
 .goal.done .goal-name { color: #dceca6; text-decoration: line-through; text-decoration-color: #71833b; }
 .goal-x { width: 28px; height: 28px; padding: 0; border: 0; background: transparent; color: #555; font-size: 20px; opacity: 0; transition: .2s ease; }
 .goal:hover .goal-x, .goal-x:focus { opacity: 1; }
@@ -97,6 +99,11 @@ h1 { margin: 0; font-size: clamp(42px, 7vw, 79px); line-height: .94; letter-spac
 .goal-section:first-child { margin-top: 0; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
 .section-heading h3 { margin: 0; color: var(--text); font-size: 16px; letter-spacing: -.03em; }
+.section-heading > .section-edit { margin-left: auto; }
+.section-edit, .goal-edit { width: 28px; height: 28px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: #666; font-size: 17px; }
+.section-edit:hover, .goal-edit:hover { color: var(--accent); background: #242a13; }
+.section-heading .section-edit { opacity: 0; transition: .2s ease; }
+.section-heading:hover .section-edit, .section-heading .section-edit:focus { opacity: 1; }
 .section-x { width: 25px; height: 25px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: #666; font-size: 18px; }
 .section-x:hover { color: var(--danger); background: #241616; }
 .section-empty { padding: 14px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); font-size: 13px; }
